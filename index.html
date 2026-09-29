@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { height:100%; overflow:hidden; }
+  html,body { height:100%; overflow:hidden; overscroll-behavior:none; }
   body{
     font-family:'Baloo 2','ZCOOL KuaiLe','Comic Sans MS','PingFang SC','Microsoft YaHei',sans-serif;
     background:linear-gradient(180deg,#aee9ff 0%,#d9f7ff 45%,#eaffd6 100%);
@@ -54,8 +54,8 @@
     grid-template-rows:repeat(9,minmax(0,1fr));
     gap:clamp(5px,.9vh,10px);padding-bottom:10px;min-height:0;}
   .cat-card .emoji{font-size:clamp(24px,5.8vh,50px);line-height:1;}
-  @media (orientation:landscape){
-    /* 压缩标题区，把高度让给卡片 */
+  /* —— 手机横屏：压缩布局 —— */
+  @media (orientation:landscape) and (max-width:899px){
     .title-wrap{padding:.4vh 0 .6vh;}
     .game-title{font-size:clamp(18px,3.4vh,28px);text-shadow:0 2px 0 #fff;}
     .game-sub{font-size:clamp(11px,1.8vh,15px);margin-top:2px;}
@@ -65,6 +65,30 @@
     .cat-card .emoji{font-size:clamp(16px,4.6vh,36px);}
     .cat-card .zh{font-size:clamp(10px,1.9vh,15px);}
     .cat-card .id{font-size:clamp(8px,1.5vh,12px);}
+  }
+  /* —— 平板竖屏（≥600px）：3列×6行，大卡片 —— */
+  @media (orientation:portrait) and (min-width:600px){
+    .title-wrap{padding:1.6vh 0 2vh;}
+    .game-title{font-size:clamp(38px,5.4vh,60px);}
+    .game-sub{font-size:clamp(18px,2.5vh,28px);}
+    .cat-grid{grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(10px,1.5vh,20px);padding-bottom:12px;}
+    .cat-card{gap:.6vh;border-radius:30px;min-height:0;}
+    .cat-card .emoji{font-size:clamp(40px,6.4vh,72px);}
+    .cat-card .zh{font-size:clamp(18px,2.7vh,28px);}
+    .cat-card .id{font-size:clamp(13px,2.1vh,21px);}
+  }
+  /* —— 平板横屏 / 电脑（≥900px）：4列×5行，舒适大卡片 —— */
+  @media (orientation:landscape) and (min-width:900px){
+    .title-wrap{padding:1.4vh 0 1.8vh;}
+    .game-title{font-size:clamp(34px,5.4vh,52px);}
+    .game-sub{font-size:clamp(17px,2.5vh,26px);}
+    .cat-grid{grid-template-columns:repeat(4,1fr);
+      grid-template-rows:repeat(5,minmax(0,1fr));gap:clamp(10px,1.4vh,18px);padding-bottom:12px;}
+    .cat-card{gap:.5vh;border-radius:30px;min-height:0;}
+    .cat-card .emoji{font-size:clamp(36px,6.6vh,64px);}
+    .cat-card .zh{font-size:clamp(17px,2.6vh,26px);}
+    .cat-card .id{font-size:clamp(12px,2vh,20px);}
   }
   .cat-card{border:none;cursor:pointer;border-radius:34px;background:#fff;
     box-shadow:0 8px 0 rgba(0,0,0,.10);display:flex;flex-direction:column;align-items:center;justify-content:center;
