@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta http-equiv="Pragma" content="no-cache">
+<title>小小双语乐园 · Dunia Kecil Dwi Bahasa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden; }
+  body{
+    font-family:'Baloo 2','ZCOOL KuaiLe','Comic Sans MS','PingFang SC','Microsoft YaHei',sans-serif;
+    background:linear-gradient(180deg,#aee9ff 0%,#d9f7ff 45%,#eaffd6 100%);
+    color:#3a2e5e; user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  }
+  /* 漂浮泡泡背景 */
+  .bubble{position:fixed;bottom:-120px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%,rgba(255,255,255,.95),rgba(255,255,255,.25));
+    animation:floatUp linear infinite;pointer-events:none;z-index:0;}
+  @keyframes floatUp{
+    0%{transform:translateY(0) translateX(0) scale(1);opacity:0;}
+    10%{opacity:.8;}
+    50%{transform:translateY(-55vh) translateX(30px) scale(1.08);}
+    100%{transform:translateY(-115vh) translateX(-20px) scale(.95);opacity:0;}
+  }
+  #app{position:relative;z-index:1;height:100%;max-width:860px;margin:0 auto;
+    display:flex;flex-direction:column;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);}
+
+  /* 顶部栏 */
+  .topbar{display:flex;align-items:center;gap:10px;padding:10px 2px;flex:none;}
+  .icon-btn{border:none;cursor:pointer;border-radius:22px;background:#fff;color:#5a4b9e;
+    font-family:inherit;font-weight:800;font-size:clamp(15px,2.4vh,20px);
+    padding:10px 18px;box-shadow:0 5px 0 #d8cdf5;transition:transform .08s,box-shadow .08s;
+    display:flex;align-items:center;gap:6px;}
+  .icon-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #d8cdf5;}
+  .lang-toggle{margin-left:auto;display:flex;background:#ffffffcc;border-radius:24px;padding:4px;box-shadow:0 4px 0 #d8cdf5;}
+  .lang-toggle button{border:none;background:transparent;font-family:inherit;font-weight:800;
+    font-size:clamp(13px,2.1vh,17px);padding:8px 16px;border-radius:20px;cursor:pointer;color:#8a7db8;}
+  .lang-toggle button.on{background:#ffb84d;color:#fff;box-shadow:0 3px 0 #e89a25;}
+
+  .screen{flex:1;display:flex;flex-direction:column;min-height:0;animation:screenIn .35s ease;}
+  @keyframes screenIn{from{opacity:0;transform:scale(.96);}to{opacity:1;transform:scale(1);}}
+
+  /* 首页 */
+  .title-wrap{text-align:center;padding:1vh 0 1.5vh;flex:none;}
+  .game-title{font-size:clamp(30px,6vh,52px);color:#ff6b9d;
+    text-shadow:0 3px 0 #fff,0 6px 0 rgba(180,120,200,.35);line-height:1.15;}
+  .game-sub{font-size:clamp(16px,2.8vh,24px);color:#4d86c7;margin-top:6px;font-weight:700;}
+  .cat-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;
+    grid-template-rows:repeat(9,minmax(0,1fr));
+    gap:clamp(5px,.9vh,10px);padding-bottom:10px;min-height:0;}
+  .cat-card .emoji{font-size:clamp(24px,5.8vh,50px);line-height:1;}
+  @media (orientation:landscape){
+    /* 压缩标题区，把高度让给卡片 */
+    .title-wrap{padding:.4vh 0 .6vh;}
+    .game-title{font-size:clamp(18px,3.4vh,28px);text-shadow:0 2px 0 #fff;}
+    .game-sub{font-size:clamp(11px,1.8vh,15px);margin-top:2px;}
+    .cat-grid{grid-template-columns:repeat(3,1fr);
+      grid-template-rows:repeat(6,minmax(0,1fr));gap:clamp(4px,.8vh,8px);padding-bottom:6px;}
+    .cat-card{gap:1px;border-radius:18px;box-shadow:0 4px 0 rgba(0,0,0,.10);min-height:0;overflow:hidden;}
+    .cat-card .emoji{font-size:clamp(16px,4.6vh,36px);}
+    .cat-card .zh{font-size:clamp(10px,1.9vh,15px);}
+    .cat-card .id{font-size:clamp(8px,1.5vh,12px);}
+  }
+  .cat-card{border:none;cursor:pointer;border-radius:34px;background:#fff;
+    box-shadow:0 8px 0 rgba(0,0,0,.10);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;transition:transform .1s;font-family:inherit;animation:wobble 2.6s ease-in-out infinite;}
+  .cat-card:active{transform:translateY(6px) scale(.98);box-shadow:0 2px 0 rgba(0,0,0,.10);}
+  .cat-card .zh{font-size:clamp(14px,2.4vh,22px);font-weight:800;}
+  .cat-card .id{font-size:clamp(11px,1.9vh,16px);font-weight:700;color:#7b6fc0;}
+  .cat-card:nth-child(1){background:linear-gradient(180deg,#fff,#fff3d6);}
+  .cat-card:nth-child(2){background:linear-gradient(180deg,#fff,#ffe3ec);}
+  .cat-card:nth-child(3){background:linear-gradient(180deg,#fff,#e3f4ff);}
+  .cat-card:nth-child(4){background:linear-gradient(180deg,#fff,#e8ffe4);}
+  .cat-card:nth-child(5){background:linear-gradient(180deg,#fff,#e0f0ff);}
+  .cat-card:nth-child(6){background:linear-gradient(180deg,#fff,#fff0e0);}
+  .cat-card:nth-child(7){background:linear-gradient(180deg,#fff,#f0e6ff);}
+  .cat-card:nth-child(8){background:linear-gradient(180deg,#fff,#e6fff6);}
+  .cat-card:nth-child(9){background:linear-gradient(180deg,#fff,#ffeef4);}
+  .cat-card:nth-child(10){background:linear-gradient(180deg,#fff,#f0f8ff);}
+  .cat-card:nth-child(11){background:linear-gradient(180deg,#fff,#fdf6d8);}
+  .cat-card:nth-child(12){background:linear-gradient(180deg,#fff,#e6f7ff);}
+  .cat-card:nth-child(13){background:linear-gradient(180deg,#fff,#f4f0ff);}
+  .cat-card:nth-child(14){background:linear-gradient(180deg,#fff,#fef0f6);}
+  .cat-card:nth-child(15){background:linear-gradient(180deg,#fff,#eef7ff);}
+  .cat-card.chat-entry{
+    background:linear-gradient(180deg,#e7fbff,#b8ecff);
+    border:4px solid #8fd9ff;
+  }
+  .cat-card.chat-entry .zh{color:#2e8bc7;}
+  .cat-card.chat-entry-2{
+    background:linear-gradient(180deg,#fff3e0,#ffd9b0);
+    border-color:#ffb870;
+  }
+  .cat-card.chat-entry-2 .zh{color:#d9762e;}
+  .cat-card:nth-child(2){animation-delay:.3s;}
+  .cat-card:nth-child(3){animation-delay:.6s;}
+  .cat-card:nth-child(4){animation-delay:.9s;}
+  .cat-card:nth-child(5){animation-delay:1.2s;}
+  .cat-card:nth-child(6){animation-delay:1.5s;}
+  .cat-card:nth-child(7){animation-delay:1.8s;}
+  .cat-card:nth-child(8){animation-delay:2.1s;}
+  .cat-card:nth-child(9){animation-delay:2.4s;}
+  .cat-card:nth-child(10){animation-delay:2.7s;}
+  .cat-card:nth-child(11){animation-delay:3.0s;}
+  .cat-card:nth-child(12){animation-delay:3.3s;}
+  .cat-card:nth-child(13){animation-delay:3.6s;}
+  .cat-card:nth-child(14){animation-delay:3.9s;}
+  .cat-card:nth-child(15){animation-delay:4.2s;}
+  .cat-card:nth-child(16){animation-delay:4.5s;}
+  .cat-card:nth-child(17){animation-delay:4.8s;}
+  @keyframes wobble{0%,100%{transform:rotate(-1.2deg);}50%{transform:rotate(1.2deg);}}
+
+  /* 模式选择 */
+  .mode-head{text-align:center;font-size:clamp(26px,5vh,44px);font-weight:800;color:#ff8c42;padding:2vh 0;flex:none;}
+  .mode-grid{flex:1;display:flex;flex-direction:column;gap:clamp(14px,3vh,30px);justify-content:center;padding-bottom:20px;}
+  .mode-btn{border:none;cursor:pointer;border-radius:40px;display:flex;align-items:center;justify-content:center;gap:18px;
+    padding:clamp(20px,4.5vh,42px) 20px;font-family:inherit;color:#fff;
+    box-shadow:0 9px 0 rgba(0,0,0,.14);transition:transform .1s;}
+  .mode-btn:active{transform:translateY(6px);box-shadow:0 3px 0 rgba(0,0,0,.14);}
+  .mode-btn.listen{background:linear-gradient(180deg,#7cd9ff,#3faeef);}
+  .mode-btn.find{background:linear-gradient(180deg,#ffd24d,#ffa92e);}
+  .mode-btn .m-emoji{font-size:clamp(48px,10vh,90px);}
+  .mode-btn .m-txt .zh{display:block;font-size:clamp(30px,6vh,52px);font-weight:800;line-height:1.1;}
+  .mode-btn .m-txt .id{display:block;font-size:clamp(16px,2.8vh,24px);font-weight:700;opacity:.95;}
+
+  /* 学习卡 */
+  .learn-stage{flex:1;display:flex;flex-direction:column;min-height:0;padding-bottom:10px;}
+  .learn-card{flex:1;background:#fff;border-radius:44px;box-shadow:0 10px 0 rgba(0,0,0,.09);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.2vh;
+    cursor:pointer;min-height:0;padding:2vh 10px;}
+  .learn-card:active .card-visual{transform:scale(.92);}
+  .card-visual{display:flex;align-items:center;justify-content:center;transition:transform .15s;animation:happy 2.4s ease-in-out infinite;}
+  @keyframes happy{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-10px) rotate(2deg);}}
+  .card-emoji{font-size:clamp(100px,30vh,240px);line-height:1;}
+  .color-ball{width:clamp(110px,28vh,220px);height:clamp(110px,28vh,220px);border-radius:50%;
+    box-shadow:inset -10px -14px 0 rgba(0,0,0,.10),0 10px 24px rgba(0,0,0,.15);}
+  .big-num{font-size:clamp(120px,34vh,280px);font-weight:800;line-height:.9;
+    background:linear-gradient(180deg,#ff8c42,#ff5e9c);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .num-dots{font-size:clamp(22px,4.5vh,40px);letter-spacing:4px;}
+  .word-zh{font-size:clamp(34px,7vh,64px);font-weight:800;color:#ff6b9d;}
+  .word-id{font-size:clamp(22px,4.4vh,38px);font-weight:700;color:#4d86c7;}
+  .tap-hint{font-size:clamp(14px,2.4vh,20px);color:#a99fd0;font-weight:700;margin-top:.4vh;}
+  .learn-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;flex:none;}
+  .nav-arrow{width:clamp(64px,11vh,96px);height:clamp(64px,11vh,96px);border-radius:50%;border:none;cursor:pointer;
+    background:#b8a8ff;color:#fff;font-size:clamp(30px,5vh,44px);font-weight:800;
+    box-shadow:0 6px 0 #8e7be0;transition:transform .08s;}
+  .nav-arrow:active{transform:translateY(4px);box-shadow:0 2px 0 #8e7be0;}
+  .dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;max-width:55%;}
+  .dots i{width:11px;height:11px;border-radius:50%;background:#cfc6ee;display:block;}
+  .dots i.on{background:#ff8c42;transform:scale(1.35);}
+
+  /* 问答游戏 */
+  .quiz-head{text-align:center;flex:none;padding:1vh 0;}
+  .quiz-ask{font-size:clamp(20px,3.6vh,30px);font-weight:800;color:#7b6fc0;}
+  .quiz-target{font-size:clamp(40px,8vh,72px);font-weight:800;color:#ff6b3d;line-height:1.1;}
+  .quiz-target .small{font-size:.45em;color:#4d86c7;display:block;}
+  .replay-btn{border:none;cursor:pointer;background:#fff;border-radius:50%;width:clamp(52px,8vh,70px);height:clamp(52px,8vh,70px);
+    font-size:clamp(24px,4vh,34px);box-shadow:0 5px 0 #d8cdf5;margin-top:6px;}
+  .replay-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #d8cdf5;}
+  .quiz-options{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(10px,2vh,18px);align-content:center;padding:1vh 0;min-height:0;}
+  @media (max-width:560px),(max-height:560px){
+    .quiz-options{grid-template-columns:1fr;}
+  }
+  .opt{border:none;cursor:pointer;border-radius:32px;background:#fff;box-shadow:0 7px 0 rgba(0,0,0,.10);
+    display:flex;align-items:center;justify-content:center;min-height:0;padding:8px;transition:transform .1s;}
+  .opt:active{transform:translateY(4px);}
+  .opt .opt-emoji{font-size:clamp(60px,16vh,150px);line-height:1;}
+  .opt .opt-color{width:clamp(64px,13vh,120px);height:clamp(64px,13vh,120px);border-radius:50%;
+    box-shadow:inset -6px -10px 0 rgba(0,0,0,.10);}
+  .opt .opt-num{font-size:clamp(60px,15vh,140px);font-weight:800;color:#7c5cff;}
+  .opt.correct{background:linear-gradient(180deg,#d8ffc9,#aef0a0);animation:popGood .5s ease;}
+  .opt.wrong{animation:shake .4s ease;background:#ffe0e0;}
+  @keyframes popGood{0%{transform:scale(1);}40%{transform:scale(1.18);}100%{transform:scale(1);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-10px);}75%{transform:translateX(10px);}}
+  .star-bar{display:flex;justify-content:center;gap:8px;height:34px;flex:none;}
+  .star-bar i{font-size:clamp(22px,3.6vh,30px);filter:grayscale(1) opacity(.35);}
+  .star-bar i.got{filter:none;animation:starPop .4s ease;}
+  @keyframes starPop{0%{transform:scale(0) rotate(-40deg);}70%{transform:scale(1.4) rotate(10deg);}100%{transform:scale(1);}}
+
+  /* 通关画面 */
+  .finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5vh;text-align:center;}
+  .trophy{font-size:clamp(110px,28vh,230px);animation:trophyBounce 1.2s ease infinite;}
+  @keyframes trophyBounce{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-16px) scale(1.06);}}
+  .finish-zh{font-size:clamp(34px,7vh,60px);font-weight:800;color:#ff6b9d;text-shadow:0 3px 0 #fff;}
+  .finish-id{font-size:clamp(20px,4vh,34px);font-weight:700;color:#4d86c7;}
+  .finish-stars{font-size:clamp(30px,6vh,52px);letter-spacing:6px;}
+  .finish-btns{display:flex;gap:14px;margin-top:1vh;}
+  .big-action{border:none;cursor:pointer;border-radius:28px;font-family:inherit;font-weight:800;
+    font-size:clamp(20px,3.6vh,28px);padding:16px 28px;color:#fff;
+    box-shadow:0 7px 0 rgba(0,0,0,.14);transition:transform .08s;}
+  .big-action:active{transform:translateY(5px);box-shadow:0 2px 0 rgba(0,0,0,.14);}
+  .big-action.again{background:linear-gradient(180deg,#7be08a,#3fbf5c);box-shadow:0 7px 0 #2c9444;}
+  .big-action.home{background:linear-gradient(180deg,#ffb84d,#ff9d2e);box-shadow:0 7px 0 #d97f15;}
+
+  /* 情景对话游戏 */
+  .chat-stage{flex:1;display:flex;flex-direction:column;min-height:0;padding-bottom:6px;}
+  .chat-char{display:flex;align-items:center;gap:clamp(8px,1.6vh,16px);flex:none;padding:1vh 2px;}
+  .chat-who{font-size:clamp(60px,14vh,120px);line-height:1;animation:happy 2.4s ease-in-out infinite;flex:none;}
+  .bubble{position:relative;background:#fff;border-radius:26px;padding:1.2vh 20px;
+    box-shadow:0 6px 0 rgba(90,75,158,.15);flex:1;min-width:0;}
+  .b-zh{font-size:clamp(23px,4.6vh,38px);font-weight:800;color:#ff6b9d;line-height:1.2;}
+  .b-id{font-size:clamp(15px,2.9vh,24px);font-weight:700;color:#4d86c7;line-height:1.2;}
+  .chat-options{flex:1;display:flex;flex-direction:column;justify-content:center;
+    gap:clamp(10px,2vh,20px);min-height:0;padding:1vh 0;}
+  .chat-opt{border:none;cursor:pointer;border-radius:30px;background:#fff;
+    box-shadow:0 7px 0 rgba(0,0,0,.10);display:flex;align-items:center;gap:clamp(12px,2.4vh,22px);
+    padding:clamp(10px,2.4vh,22px) 22px;transition:transform .1s;font-family:inherit;}
+  .chat-opt:active{transform:translateY(4px);}
+  .chat-opt .co-emoji{font-size:clamp(36px,7vh,64px);flex:none;}
+  .chat-opt .co-text{display:flex;flex-direction:column;text-align:left;line-height:1.15;}
+  .chat-opt .co-zh{font-size:clamp(26px,5.2vh,44px);font-weight:800;color:#ff6b9d;}
+  .chat-opt .co-id{font-size:clamp(16px,3.2vh,26px);font-weight:700;color:#4d86c7;}
+  .chat-opt.correct{background:linear-gradient(180deg,#d8ffc9,#aef0a0);animation:popGood .5s ease;}
+  .chat-opt.wrong{animation:shake .4s ease;background:#ffe0e0;}
+  .chat-dots{flex:none;padding-top:6px;}
+
+  /* 彩带 */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50;overflow:hidden;}
+  .confetti-piece{position:absolute;top:-30px;border-radius:3px;animation:confettiFall linear forwards;}
+  @keyframes confettiFall{
+    to{transform:translateY(110vh) rotate(720deg);opacity:.9;}
+  }
+</style>
+</head>
+<body>
+<div id="confetti"></div>
+<div id="app"></div>
+<script>
+'use strict';
+/* ================= 词库 ================= */
+const DATA = {
+  animals: {
+    name:{zh:'小动物',id:'Hewan'}, emoji:'🐾',
+    items:[
+      {zh:'猫', id:'kucing', emoji:'🐱'},
+      {zh:'狗', id:'anjing', emoji:'🐶'},
+      {zh:'奶牛', id:'sapi', emoji:'🐮'},
+      {zh:'鸭子', id:'bebek', emoji:'🦆'},
+      {zh:'小猪', id:'babi', emoji:'🐷'},
+      {zh:'小鸟', id:'burung', emoji:'🐦'},
+      {zh:'小鱼', id:'ikan', emoji:'🐟'},
+      {zh:'狮子', id:'singa', emoji:'🦁'},
+      {zh:'猴子', id:'monyet', emoji:'🐵'},
+      {zh:'大象', id:'gajah', emoji:'🐘'},
+      {zh:'兔子', id:'kelinci', emoji:'🐰'},
+      {zh:'青蛙', id:'katak', emoji:'🐸'}
+    ]
+  },
+  family: {
+    name:{zh:'家庭成员',id:'Keluarga'}, emoji:'👨‍👩‍👧‍👦',
+    items:[
+      {zh:'爸爸', id:'ayah', emoji:'👨'},
+      {zh:'妈妈', id:'ibu', emoji:'👩'},
+      {zh:'爷爷', id:'kakek', emoji:'👴'},
+      {zh:'奶奶', id:'nenek', emoji:'👵'},
+      {zh:'哥哥', id:'kakak laki-laki', emoji:'👦'},
+      {zh:'姐姐', id:'kakak perempuan', emoji:'👧'},
+      {zh:'弟弟', id:'adik laki-laki', emoji:'🧒'},
+      {zh:'妹妹', id:'adik perempuan', emoji:'👶'},
+      {zh:'叔叔', id:'paman', emoji:'🧔'},
+      {zh:'阿姨', id:'bibi', emoji:'👩‍🦰'},
+      {zh:'宝宝', id:'bayi', emoji:'👼'},
+      {zh:'全家福', id:'keluarga', emoji:'👨‍👩‍👧‍👦'}
+    ]
+  },
+  fruits: {
+    name:{zh:'水果',id:'Buah'}, emoji:'🍎',
+    items:[
+      {zh:'苹果', id:'apel', emoji:'🍎'},
+      {zh:'香蕉', id:'pisang', emoji:'🍌'},
+      {zh:'橙子', id:'jeruk', emoji:'🍊'},
+      {zh:'葡萄', id:'anggur', emoji:'🍇'},
+      {zh:'西瓜', id:'semangka', emoji:'🍉'},
+      {zh:'草莓', id:'stroberi', emoji:'🍓'},
+      {zh:'梨', id:'pir', emoji:'🍐'},
+      {zh:'菠萝', id:'nanas', emoji:'🍍'},
+      {zh:'樱桃', id:'ceri', emoji:'🍒'},
+      {zh:'柠檬', id:'lemon', emoji:'🍋'}
+    ]
+  },
+  vegetables: {
+    name:{zh:'蔬菜',id:'Sayur'}, emoji:'🥦',
+    items:[
+      {zh:'胡萝卜', id:'wortel', emoji:'🥕'},
+      {zh:'玉米', id:'jagung', emoji:'🌽'},
+      {zh:'土豆', id:'kentang', emoji:'🥔'},
+      {zh:'番茄', id:'tomat', emoji:'🍅'},
+      {zh:'茄子', id:'terung', emoji:'🍆'},
+      {zh:'辣椒', id:'cabai', emoji:'🌶️'},
+      {zh:'黄瓜', id:'timun', emoji:'🥒'},
+      {zh:'西兰花', id:'brokoli', emoji:'🥦'},
+      {zh:'洋葱', id:'bawang bombay', emoji:'🧅'},
+      {zh:'蘑菇', id:'jamur', emoji:'🍄'},
+      {zh:'生菜', id:'selada', emoji:'🥬'},
+      {zh:'大蒜', id:'bawang putih', emoji:'🧄'}
+    ]
+  },
+  tastes: {
+    name:{zh:'食物味道',id:'Rasa Makanan'}, emoji:'😋',
+    items:[
+      {zh:'甜甜的', id:'manis', emoji:'🍯'},
+      {zh:'酸酸的', id:'asam', emoji:'🍋'},
+      {zh:'苦苦的', id:'pahit', emoji:'☕'},
+      {zh:'辣辣的', id:'pedas', emoji:'🌶️'},
+      {zh:'咸咸的', id:'asin', emoji:'🧂'},
+      {zh:'香香的', id:'harum', emoji:'🌸'},
+      {zh:'凉凉的', id:'dingin', emoji:'🧊'},
+      {zh:'热热的', id:'panas', emoji:'♨️'},
+      {zh:'软软的', id:'lembut', emoji:'☁️'},
+      {zh:'脆脆的', id:'renyah', emoji:'🍪'}
+    ]
+  },
+  colors: {
+    name:{zh:'颜色',id:'Warna'}, emoji:'🌈',
+    items:[
+      {zh:'红色', id:'merah', color:'#ff5a5a'},
+      {zh:'黄色', id:'kuning', color:'#ffd93d'},
+      {zh:'蓝色', id:'biru', color:'#4d96ff'},
+      {zh:'绿色', id:'hijau', color:'#5bcf5f'},
+      {zh:'紫色', id:'ungu', color:'#b06cff'},
+      {zh:'橙色', id:'oranye', color:'#ff9f43'},
+      {zh:'粉色', id:'merah muda', color:'#ff8fc7'},
+      {zh:'黑色', id:'hitam', color:'#555555'},
+      {zh:'白色', id:'putih', color:'#ffffff'},
+      {zh:'棕色', id:'cokelat', color:'#b5793f'}
+    ]
+  },
+  numbers: {
+    name:{zh:'数字',id:'Angka'}, emoji:'🔢',
+    items:[1,2,3,4,5,6,7,8,9,10].map(n=>({
+      n:n,
+      zh:['','一','二','三','四','五','六','七','八','九','十'][n],
+      id:['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh'][n]
+    }))
+  },
+  vehicles: {
+    name:{zh:'交通工具',id:'Kendaraan'}, emoji:'🚗',
+    items:[
+      {zh:'小汽车', id:'mobil', emoji:'🚗'},
+      {zh:'公交车', id:'bis', emoji:'🚌'},
+      {zh:'出租车', id:'taksi', emoji:'🚕'},
+      {zh:'消防车', id:'mobil pemadam kebakaran', emoji:'🚒'},
+      {zh:'救护车', id:'ambulans', emoji:'🚑'},
+      {zh:'火车', id:'kereta api', emoji:'🚆'},
+      {zh:'飞机', id:'pesawat terbang', emoji:'✈️'},
+      {zh:'直升机', id:'helikopter', emoji:'🚁'},
+      {zh:'轮船', id:'kapal', emoji:'🚢'},
+      {zh:'自行车', id:'sepeda', emoji:'🚲'},
+      {zh:'摩托车', id:'sepeda motor', emoji:'🏍️'},
+      {zh:'热气球', id:'balon udara', emoji:'🎈'}
+    ]
+  },
+  professions: {
+    name:{zh:'人物职业',id:'Pekerjaan'}, emoji:'👮',
+    items:[
+      {zh:'医生', id:'dokter', emoji:'👨‍⚕️'},
+      {zh:'护士', id:'perawat', emoji:'👩‍⚕️'},
+      {zh:'警察', id:'polisi', emoji:'👮'},
+      {zh:'消防员', id:'pemadam kebakaran', emoji:'👨‍🚒'},
+      {zh:'老师', id:'guru', emoji:'👩‍🏫'},
+      {zh:'厨师', id:'koki', emoji:'👨‍🍳'},
+      {zh:'农民', id:'petani', emoji:'👨‍🌾'},
+      {zh:'建筑工人', id:'pekerja bangunan', emoji:'👷'},
+      {zh:'宇航员', id:'astronot', emoji:'👨‍🚀'},
+      {zh:'飞行员', id:'pilot', emoji:'👨‍✈️'},
+      {zh:'画家', id:'pelukis', emoji:'👨‍🎨'},
+      {zh:'科学家', id:'ilmuwan', emoji:'👨‍🔬'}
+    ]
+  },
+  body: {
+    name:{zh:'身体部位',id:'Anggota Tubuh'}, emoji:'🧒',
+    items:[
+      {zh:'头', id:'kepala', emoji:'🙂'},
+      {zh:'头发', id:'rambut', emoji:'💇'},
+      {zh:'脸', id:'wajah', emoji:'😊'},
+      {zh:'眼睛', id:'mata', emoji:'👀'},
+      {zh:'鼻子', id:'hidung', emoji:'👃'},
+      {zh:'嘴巴', id:'mulut', emoji:'👄'},
+      {zh:'耳朵', id:'telinga', emoji:'👂'},
+      {zh:'牙齿', id:'gigi', emoji:'🦷'},
+      {zh:'舌头', id:'lidah', emoji:'👅'},
+      {zh:'小手', id:'tangan', emoji:'✋'},
+      {zh:'小脚', id:'kaki', emoji:'🦶'},
+      {zh:'腿', id:'tungkai', emoji:'🦵'}
+    ]
+  },
+  clothes: {
+    name:{zh:'衣服鞋帽',id:'Pakaian'}, emoji:'👕',
+    items:[
+      {zh:'上衣', id:'baju', emoji:'👕'},
+      {zh:'裤子', id:'celana', emoji:'👖'},
+      {zh:'裙子', id:'rok', emoji:'👗'},
+      {zh:'外套', id:'jaket', emoji:'🧥'},
+      {zh:'毛衣', id:'sweter', emoji:'🧶'},
+      {zh:'袜子', id:'kaus kaki', emoji:'🧦'},
+      {zh:'鞋子', id:'sepatu', emoji:'👟'},
+      {zh:'凉鞋', id:'sandal', emoji:'🩴'},
+      {zh:'帽子', id:'topi', emoji:'🧢'},
+      {zh:'草帽', id:'topi jerami', emoji:'👒'},
+      {zh:'围巾', id:'syal', emoji:'🧣'},
+      {zh:'手套', id:'sarung tangan', emoji:'🧤'}
+    ]
+  },
+  actions: {
+    name:{zh:'动作',id:'Gerakan'}, emoji:'🏃',
+    items:[
+      {zh:'跑一跑', id:'berlari', emoji:'🏃'},
+      {zh:'跳一跳', id:'melompat', emoji:'🤸'},
+      {zh:'走一走', id:'berjalan', emoji:'🚶'},
+      {zh:'爬一爬', id:'merangkak', emoji:'🧗'},
+      {zh:'坐下来', id:'duduk', emoji:'🪑'},
+      {zh:'站起来', id:'berdiri', emoji:'🧍'},
+      {zh:'睡觉觉', id:'tidur', emoji:'😴'},
+      {zh:'吃一口', id:'makan', emoji:'🍽️'},
+      {zh:'喝一口', id:'minum', emoji:'🥤'},
+      {zh:'抱一抱', id:'memeluk', emoji:'🤗'},
+      {zh:'拍拍手', id:'bertepuk tangan', emoji:'👏'},
+      {zh:'挥挥手', id:'melambai', emoji:'👋'}
+    ]
+  },
+  household: {
+    name:{zh:'生活用品',id:'Benda Rumah'}, emoji:'🪑',
+    items:[
+      {zh:'杯子', id:'cangkir', emoji:'☕'},
+      {zh:'勺子', id:'sendok', emoji:'🥄'},
+      {zh:'叉子', id:'garpu', emoji:'🍴'},
+      {zh:'筷子', id:'sumpit', emoji:'🥢'},
+      {zh:'小床', id:'tempat tidur', emoji:'🛏️'},
+      {zh:'椅子', id:'kursi', emoji:'🪑'},
+      {zh:'台灯', id:'lampu', emoji:'💡'},
+      {zh:'雨伞', id:'payung', emoji:'☂️'},
+      {zh:'肥皂', id:'sabun', emoji:'🧼'},
+      {zh:'牙刷', id:'sikat gigi', emoji:'🪥'},
+      {zh:'闹钟', id:'jam weker', emoji:'⏰'},
+      {zh:'电视', id:'televisi', emoji:'📺'}
+    ]
+  },
+  daily: {
+    name:{zh:'日常用语',id:'Kata Sehari-hari'}, emoji:'🗣️',
+    items:[
+      {zh:'我要喝水', id:'saya mau minum', emoji:'💧'},
+      {zh:'我要吃饭', id:'saya mau makan', emoji:'🍚'},
+      {zh:'我要尿尿', id:'saya mau pipis', emoji:'🚽'},
+      {zh:'我困了', id:'saya mengantuk', emoji:'😴'},
+      {zh:'抱抱我', id:'minta gendong', emoji:'🤗'},
+      {zh:'我爱你', id:'aku cinta kamu', emoji:'❤️'},
+      {zh:'一起玩', id:'main bersama yuk', emoji:'🤝'},
+      {zh:'没关系', id:'tidak apa-apa', emoji:'😊'},
+      {zh:'给你', id:'ini untukmu', emoji:'🤲'},
+      {zh:'我要这个', id:'saya mau ini', emoji:'☝️'},
+      {zh:'晚安', id:'selamat tidur', emoji:'🌙'},
+      {zh:'你好棒', id:'kamu hebat', emoji:'🌟'},
+      {zh:'帮我打开', id:'tolong buka', emoji:'📦'},
+      {zh:'我要大便', id:'saya mau pup', emoji:'💩'},
+      {zh:'等一下', id:'tunggu sebentar', emoji:'✋'},
+      {zh:'真好吃', id:'enak sekali', emoji:'😋'}
+    ]
+  },
+  weather: {
+    name:{zh:'自然天气',id:'Cuaca'}, emoji:'🌤️',
+    items:[
+      {zh:'太阳', id:'matahari', emoji:'☀️'},
+      {zh:'月亮', id:'bulan', emoji:'🌙'},
+      {zh:'星星', id:'bintang', emoji:'⭐'},
+      {zh:'白云', id:'awan', emoji:'☁️'},
+      {zh:'下雨', id:'hujan', emoji:'🌧️'},
+      {zh:'打雷', id:'guntur', emoji:'⛈️'},
+      {zh:'彩虹', id:'pelangi', emoji:'🌈'},
+      {zh:'下雪', id:'salju', emoji:'❄️'},
+      {zh:'刮风', id:'berangin', emoji:'🌬️'},
+      {zh:'晴天', id:'cerah', emoji:'🌤️'},
+      {zh:'闪电', id:'petir', emoji:'⚡'},
+      {zh:'夜晚', id:'malam hari', emoji:'🌃'}
+    ]
+  }
+};
+
+/* ================= 情景对话游戏 ================= */
+/* 应答短语（音频键 chat-r-<key>-zh/id） */
+const CHAT_PHRASES = {
+  hello:  {zh:'你好！', id:'Halo!'},
+  bye:    {zh:'再见！', id:'Dadah!'},
+  morning:{zh:'早上好！', id:'Selamat pagi!'},
+  thanks: {zh:'谢谢！', id:'Terima kasih!'},
+  sorry:  {zh:'对不起！', id:'Maaf!'}
+};
+/* 5 个生活场景：角色 → 台词 → 两个应答选项 */
+const CHAT_SCENES = [
+  {who:'🐰', line:{zh:'你好呀！',id:'Halo teman!'},
+   options:[{key:'hello',emoji:'👋',ok:true},{key:'bye',emoji:'👋',ok:false}]},
+  {who:'👩', line:{zh:'早上好，宝贝！',id:'Selamat pagi, sayang!'},
+   options:[{key:'morning',emoji:'🌅',ok:true},{key:'bye',emoji:'🌙',ok:false}]},
+  {who:'🐻', line:{zh:'这个送给你！',id:'Ini untukmu!'},
+   options:[{key:'thanks',emoji:'🎁',ok:true},{key:'sorry',emoji:'🙇',ok:false}]},
+  {who:'🐼', line:{zh:'哎哟！',id:'Aduh!'},
+   options:[{key:'sorry',emoji:'🙇',ok:true},{key:'thanks',emoji:'🎁',ok:false}]},
+  {who:'🐥', line:{zh:'明天见！',id:'Sampai jumpa besok!'},
+   options:[{key:'bye',emoji:'👋',ok:true},{key:'hello',emoji:'👋',ok:false}]}
+];
+/* 第二组应答短语（音频键 chat2-r-<key>-zh/id） */
+const CHAT_PHRASES2 = {
+  ok:    {zh:'好呀好呀！', id:'Boleh, yuk!'},
+  eat:   {zh:'我要吃饭！', id:'Saya mau makan!'},
+  drink: {zh:'我要喝水！', id:'Saya mau minum!'},
+  night: {zh:'晚安！', id:'Selamat tidur!'},
+  hug:   {zh:'抱抱！', id:'Minta gendong!'}
+};
+/* 第二组 5 个生活场景：玩耍/吃饭/喝水/睡觉/抱抱 */
+const CHAT_SCENES2 = [
+  {who:'🐵', line:{zh:'一起玩好不好？',id:'Main bersama, yuk?'},
+   options:[{key:'ok',emoji:'🤝',ok:true},{key:'bye',emoji:'👋',ok:false}]},
+  {who:'👩', line:{zh:'肚子饿了吗？',id:'Kamu sudah lapar?'},
+   options:[{key:'eat',emoji:'🍚',ok:true},{key:'drink',emoji:'💧',ok:false}]},
+  {who:'🐰', line:{zh:'口渴了吧？',id:'Haus ya?'},
+   options:[{key:'drink',emoji:'💧',ok:true},{key:'eat',emoji:'🍚',ok:false}]},
+  {who:'👩', line:{zh:'该睡觉啦！',id:'Saatnya tidur!'},
+   options:[{key:'night',emoji:'🌙',ok:true},{key:'morning',emoji:'🌅',ok:false}]},
+  {who:'🐼', line:{zh:'来，抱抱！',id:'Ayo, minta gendong!'},
+   options:[{key:'hug',emoji:'🤗',ok:true},{key:'thanks',emoji:'🎁',ok:false}]}
+];
+
+/* ================= 文案 ================= */
+const UI = {
+  title:{zh:'小小双语乐园',id:'Dunia Dwi Bahasa'},
+  listen:{zh:'听一听',id:'Dengarkan'},
+  find:{zh:'找一找',id:'Temukan'},
+  tapHint:{zh:'👆 点一点，跟我读',id:'👆 Ketuk dan ulangi'},
+  askWhere:{zh:'在哪里？',id:'di mana?'},
+  again:{zh:'再玩一次',id:'Main lagi'},
+  home:{zh:'回主页',id:'Ke Beranda'},
+  finishZh:'你太厉害啦！',
+  finishId:'Luar biasa! Pintar sekali!',
+  praiseZh:['真棒！','太好啦！','答对了！','好聪明！'],
+  praiseId:['Hebat!','Bagus sekali!','Pintar sekali!','Mantap!'],
+  tryZh:['再试一次','没关系，再试试'],
+  tryId:['Coba lagi ya','Coba sekali lagi']
+};
+
+/* ================= 状态 ================= */
+let LANG = 'zh';           // 主要语言
+let screen = 'home';
+let cat = null;
+let cardIndex = 0;
+let quiz = { target:null, options:[], round:0, total:5, stars:0, locked:false };
+let chat = { set:0, scene:0, locked:false };
+
+/* ================= 真人语音 MP3（离线时回退浏览器合成） ================= */
+let voices = [];
+function loadVoices(){ try{ voices = speechSynthesis.getVoices(); }catch(e){} }
+if('speechSynthesis' in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged = loadVoices;
+}
+function pickVoice(prefix){
+  return voices.find(v=>v.lang.toLowerCase().replace('_','-').startsWith(prefix));
+}
+/* 浏览器合成（兜底） */
+function speakTTS(text, lang){
+  return new Promise(resolve=>{
+    if(!('speechSynthesis' in window)){ setTimeout(resolve,300); return; }
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = lang==='zh' ? 'zh-CN' : 'id-ID';
+    const v = pickVoice(lang==='zh'?'zh':'id');
+    if(v) u.voice = v;
+    u.rate = 0.85; u.pitch = 1.15;
+    let done = false;
+    const fin = ()=>{ if(!done){ done=true; res(); } };
+    u.onend = fin; u.onerror = fin;
+    setTimeout(fin, 2800);
+    speechSynthesis.speak(u);
+    function res(){ resolve(); }
+  });
+}
+
+/* MP3 缓存 */
+const audioCache = {};
+function getAudio(key){
+  if(!audioCache[key]){
+    const a = new Audio('audio/' + key + '.mp3');
+    a.preload = 'auto';
+    a.addEventListener('error', ()=>{ a._failed = true; }, {once:true});
+    audioCache[key] = a;
+  }
+  return audioCache[key];
+}
+
+/* 序列控制：新序列自动打断旧序列 */
+let seqId = 0;
+function stopVoice(){
+  seqId++;
+  Object.values(audioCache).forEach(a=>{ try{ a.pause(); }catch(e){} });
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+const alive = t => t === seqId;
+function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* 播放单条：MP3 成功则用 MP3，失败回退 TTS */
+function oneClip(step, token){
+  return new Promise(resolve=>{
+    if(!alive(token)){ resolve('aborted'); return; }
+    const a = getAudio(step.key);
+    let settled = false;
+    const done = s => { if(!settled){ settled = true; resolve(s); } };
+    const fallback = ()=>{
+      if(!alive(token)){ done('aborted'); return; }
+      speakTTS(step.text, step.lang).then(()=>done('tts'));
+    };
+    const startPlay = ()=>{
+      if(a._failed){ fallback(); return; }
+      Object.values(audioCache).forEach(o=>{ if(o!==a){ try{o.pause();}catch(e){} } });
+      const onEnd = ()=>{ cleanup(); done('ok'); };
+      const onErr = ()=>{ cleanup(); fallback(); };
+      function cleanup(){ a.removeEventListener('ended',onEnd); a.removeEventListener('error',onErr); }
+      a.addEventListener('ended',onEnd);
+      a.addEventListener('error',onErr);
+      try{ a.currentTime = 0; }catch(e){}
+      a.play().then(()=>{}, ()=>{ cleanup(); fallback(); });
+    };
+    if(a._failed){ fallback(); return; }
+    if(a.readyState >= 2){ startPlay(); return; }
+    const ready = ()=>{ rem(); startPlay(); };
+    const errH  = ()=>{ rem(); fallback(); };
+    function rem(){ a.removeEventListener('canplay',ready); a.removeEventListener('error',errH); }
+    a.addEventListener('canplay',ready);
+    a.addEventListener('error',errH);
+    setTimeout(()=>{ if(!settled){ rem(); fallback(); } }, 2000);
+  });
+}
+
+/* 顺序播放多段语音，全部结束后 resolve；被打断则立即 resolve */
+async function playSequence(steps){
+  const token = ++seqId;
+  Object.values(audioCache).forEach(a=>{ try{ a.pause(); }catch(e){} });
+  for(const s of steps){
+    if(!alive(token)) return;
+    const r = await oneClip(s, token);
+    if(!alive(token) || r==='aborted') return;
+    if(s.gap) await wait(s.gap);
+  }
+}
+
+/* 词条 → 音频键 */
+function itemIndexOf(item){ return DATA[cat].items.indexOf(item); }
+function itemKeys(item){
+  const i = itemIndexOf(item);
+  return {
+    zh:`${cat}-${i}-zh`, id:`${cat}-${i}-id`,
+    askzh:`${cat}-${i}-askzh`, askid:`${cat}-${i}-askid`
+  };
+}
+/* 学习卡：主语言 → 另一语言 */
+function speakCard(item){
+  const other = LANG==='zh' ? 'id' : 'zh';
+  const k = itemKeys(item);
+  return playSequence([
+    {key:k[LANG], text:item[LANG], lang:LANG, gap:200},
+    {key:k[other], text:item[other], lang:other}
+  ]);
+}
+
+/* ================= 音效（WebAudio 合成，无需素材） ================= */
+let AC = null;
+function audioCtx(){
+  try{
+    if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==='suspended') AC.resume();
+  }catch(e){}
+  return AC;
+}
+function beep(freq, delay, dur, type, vol){
+  const c = audioCtx(); if(!c) return;
+  const t0 = c.currentTime + delay;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type||'sine'; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.18,t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0+dur+0.05);
+}
+const sfx = {
+  pop(){ beep(680,0,0.1,'triangle',0.15); beep(990,0.05,0.08,'sine',0.1); },
+  good(){ [523,659,784,1047].forEach((f,i)=>beep(f,i*0.09,0.22,'sine',0.16)); },
+  bad(){ beep(320,0,0.18,'sawtooth',0.06); beep(230,0.16,0.25,'sawtooth',0.06); },
+  fanfare(){ [523,659,784,1047,1319].forEach((f,i)=>beep(f,i*0.13,0.3,'triangle',0.16)); }
+};
+
+/* ================= 彩带 ================= */
+function confettiBurst(n){
+  const box = document.getElementById('confetti');
+  const colors = ['#ff5a5a','#ffd93d','#4d96ff','#5bcf5f','#b06cff','#ff9f43','#ff8fc7'];
+  for(let i=0;i<(n||36);i++){
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    const size = 8 + Math.random()*10;
+    p.style.width = size+'px';
+    p.style.height = (size*0.6)+'px';
+    p.style.left = Math.random()*100+'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (1.8+Math.random()*1.6)+'s';
+    p.style.animationDelay = (Math.random()*0.35)+'s';
+    if(Math.random()>.6) p.style.borderRadius='50%';
+    box.appendChild(p);
+    setTimeout(()=>p.remove(), 4200);
+  }
+}
+
+/* ================= 工具 ================= */
+const $ = s => document.querySelector(s);
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function visualHTML(item, cls){
+  if(item.emoji) return `<div class="${cls}-emoji">${item.emoji}</div>`;
+  if(item.color){
+    const border = item.color==='#ffffff' ? 'border:4px solid #e4e4f5;' : '';
+    return `<div class="${cls}-color" style="background:${item.color};${border}"></div>`;
+  }
+  return `<div class="${cls}-num">${item.n}</div>`;
+}
+
+/* ================= 渲染 ================= */
+function topbar(showHome){
+  return `<div class="topbar">
+    ${showHome ? `<button class="icon-btn" onclick="goHome()">🏠 ${LANG==='zh'?'主页':'Beranda'}</button>` : '<span></span>'}
+    <div class="lang-toggle">
+      <button class="${LANG==='zh'?'on':''}" onclick="setLang('zh')">中文</button>
+      <button class="${LANG==='id'?'on':''}" onclick="setLang('id')">Bahasa</button>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const app = $('#app');
+  if(screen==='home'){
+    app.innerHTML = topbar(false) + `<div class="screen">
+      <div class="title-wrap">
+        <div class="game-title">🌈 ${UI.title[LANG]}</div>
+        <div class="game-sub">${LANG==='zh'?'点一点，一起说中文和印尼语！':'Ketuk, belajar Bahasa & Mandarin!'}</div>
+      </div>
+      <div class="cat-grid">
+        ${Object.keys(DATA).map(k=>`
+          <button class="cat-card" onclick="chooseCat('${k}')">
+            <span class="emoji">${DATA[k].emoji}</span>
+            <span class="zh">${DATA[k].name.zh}</span>
+            <span class="id">${DATA[k].name.id}</span>
+          </button>`).join('')}
+          <button class="cat-card chat-entry" onclick="startChat(0)">
+            <span class="emoji">💬</span>
+            <span class="zh">我会打招呼</span>
+            <span class="id">Belajar Menyapa</span>
+          </button>
+          <button class="cat-card chat-entry chat-entry-2" onclick="startChat(1)">
+            <span class="emoji">🍼</span>
+            <span class="zh">我会说日常</span>
+            <span class="id">Bahasa Sehari-hari</span>
+          </button>
+      </div>
+    </div>`;
+  }
+  else if(screen==='mode'){
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="mode-head">${DATA[cat].emoji} ${DATA[cat].name[LANG]}</div>
+      <div class="mode-grid">
+        <button class="mode-btn listen" onclick="startLearn()">
+          <span class="m-emoji">👂</span>
+          <span class="m-txt"><span class="zh">${UI.listen[LANG]}</span><span class="id">Dengarkan</span></span>
+        </button>
+        <button class="mode-btn find" onclick="startQuiz()">
+          <span class="m-emoji">🔍</span>
+          <span class="m-txt"><span class="zh">${UI.find[LANG]}</span><span class="id">Temukan</span></span>
+        </button>
+      </div>
+    </div>`;
+  }
+  else if(screen==='learn'){
+    const items = DATA[cat].items;
+    const item = items[cardIndex];
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="learn-stage">
+        <div class="learn-card" id="learnCard">
+          <div class="card-visual">${visualHTML(item,'card')}</div>
+          ${item.n ? `<div class="num-dots">${'⭐'.repeat(item.n)}</div>`:''}
+          <div class="word-zh">${item.zh}</div>
+          <div class="word-id">${item.id}</div>
+          <div class="tap-hint">${UI.tapHint[LANG]}</div>
+        </div>
+        <div class="learn-nav">
+          <button class="nav-arrow" onclick="moveCard(-1)">‹</button>
+          <div class="dots">${items.map((_,i)=>`<i class="${i===cardIndex?'on':''}"></i>`).join('')}</div>
+          <button class="nav-arrow" onclick="moveCard(1)">›</button>
+        </div>
+      </div>
+    </div>`;
+    $('#learnCard').addEventListener('click',()=>{ sfx.pop(); speakCard(item); });
+    speakCard(item);
+  }
+  else if(screen==='quiz'){
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="quiz-head">
+        <div class="quiz-ask">${LANG==='zh'?'找一找':'Cari ya'}</div>
+        <div class="quiz-target">
+          ${quiz.target[LANG]}
+          <span class="small">${quiz.target[LANG==='zh'?'id':'zh']}</span>
+        </div>
+        <button class="replay-btn" onclick="ask()">🔊</button>
+      </div>
+      <div class="star-bar">
+        ${Array.from({length:quiz.total},(_,i)=>`<i class="${i<quiz.stars?'got':''}">⭐</i>`).join('')}
+      </div>
+      <div class="quiz-options" id="options">
+        ${quiz.options.map((it,idx)=>`
+          <button class="opt" data-idx="${idx}">${visualHTML(it,'opt')}</button>`).join('')}
+      </div>
+    </div>`;
+    document.querySelectorAll('.opt').forEach(btn=>{
+      btn.addEventListener('click',()=>answer(parseInt(btn.dataset.idx),btn));
+    });
+    ask();
+  }
+  else if(screen==='finish'){
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="finish">
+        <div class="trophy">🏆</div>
+        <div class="finish-stars">${'⭐'.repeat(quiz.stars)}</div>
+        <div class="finish-zh">${UI.finishZh}</div>
+        <div class="finish-id">${UI.finishId}</div>
+        <div class="finish-btns">
+          <button class="big-action again" onclick="startQuiz()">🔁 ${UI.again[LANG]}</button>
+          <button class="big-action home" onclick="goHome()">🏠 ${UI.home[LANG]}</button>
+        </div>
+      </div>
+    </div>`;
+    /* 通关祝贺：主语言在前 */
+    const steps = LANG==='zh'
+      ? [{key:'finish-zh',text:UI.finishZh,lang:'zh',gap:220},{key:'finish-id',text:UI.finishId,lang:'id'}]
+      : [{key:'finish-id',text:UI.finishId,lang:'id',gap:220},{key:'finish-zh',text:UI.finishZh,lang:'zh'}];
+    playSequence(steps);
+  }
+  else if(screen==='chat'){
+    const scenes = chat.set ? CHAT_SCENES2 : CHAT_SCENES;
+    const sc = scenes[chat.scene];
+    /* 合并两组短语表用于查找 */
+    const phraseMap = chat.set ? Object.assign({},CHAT_PHRASES,CHAT_PHRASES2) : CHAT_PHRASES;
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="chat-stage">
+        <div class="chat-char">
+          <div class="chat-who" id="chatWho">${sc.who}</div>
+          <div class="bubble">
+            <div class="b-zh">${sc.line.zh}</div>
+            <div class="b-id">${sc.line.id}</div>
+          </div>
+          <button class="replay-btn" onclick="chatLine()">🔊</button>
+        </div>
+        <div class="chat-options" id="chatOptions">
+          ${sc.options.map((op,idx)=>{
+            const p = phraseMap[op.key];
+            return `<button class="chat-opt" data-idx="${idx}">
+              <span class="co-emoji">${op.emoji}</span>
+              <span class="co-text"><span class="co-zh">${p.zh}</span><span class="co-id">${p.id}</span></span>
+            </button>`;
+          }).join('')}
+        </div>
+        <div class="dots chat-dots">
+          ${scenes.map((_,i)=>`<i class="${i===chat.scene?'on':''}"></i>`).join('')}
+        </div>
+      </div>
+    </div>`;
+    document.querySelectorAll('.chat-opt').forEach(b=>{
+      b.addEventListener('click',()=>chatAnswer(parseInt(b.dataset.idx),b));
+    });
+    chatLine();
+  }
+  else if(screen==='chatfinish'){
+    const meta = chat.set
+      ? {emoji:'🍼', zh:'日常用语我会说！', id:'Sudah bisa bahasa sehari-hari!',
+         fzh:'日常用语我会说，真棒！', fid:'Sudah bisa bahasa sehari-hari, hebat!',
+         kzh:'chat2finish-zh', kid:'chat2finish-id'}
+      : {emoji:'🎉', zh:'你会打招呼啦！', id:'Kamu sudah bisa menyapa!',
+         fzh:'你会打招呼啦，真棒！', fid:'Kamu sudah bisa menyapa, hebat!',
+         kzh:'chatfinish-zh', kid:'chatfinish-id'};
+    app.innerHTML = topbar(true) + `<div class="screen">
+      <div class="finish">
+        <div class="trophy">${meta.emoji}</div>
+        <div class="finish-stars">💬</div>
+        <div class="finish-zh">${meta.zh}</div>
+        <div class="finish-id">${meta.id}</div>
+        <div class="finish-btns">
+          <button class="big-action again" onclick="startChat(${chat.set})">🔁 ${UI.again[LANG]}</button>
+          <button class="big-action home" onclick="goHome()">🏠 ${UI.home[LANG]}</button>
+        </div>
+      </div>
+    </div>`;
+    const steps = LANG==='zh'
+      ? [{key:meta.kzh,text:meta.fzh,lang:'zh',gap:220},{key:meta.kid,text:meta.fid,lang:'id'}]
+      : [{key:meta.kid,text:meta.fid,lang:'id',gap:220},{key:meta.kzh,text:meta.fzh,lang:'zh'}];
+    playSequence(steps);
+  }
+}
+
+/* ================= 交互逻辑 ================= */
+function setLang(l){ LANG=l; render(); }
+function goHome(){ stopVoice(); screen='home'; cat=null; render(); }
+function chooseCat(k){ sfx.pop(); cat=k; screen='mode'; render(); }
+
+/* 学习模式 */
+function startLearn(){
+  sfx.pop(); cardIndex=0; screen='learn'; render();
+}
+function moveCard(d){
+  sfx.pop();
+  const n = DATA[cat].items.length;
+  cardIndex = (cardIndex + d + n) % n;
+  render();
+}
+
+/* 问答模式 */
+function startQuiz(){
+  sfx.pop();
+  quiz.round=0; quiz.stars=0; quiz.locked=false;
+  newQuestion();
+  screen='quiz';
+  render();
+}
+function newQuestion(){
+  const pool = DATA[cat].items;
+  let target;
+  do { target = pool[Math.floor(Math.random()*pool.length)]; }
+  while(quiz.target && target===quiz.target && pool.length>3);
+  const distract = shuffle(pool.filter(x=>x!==target)).slice(0,2);
+  quiz.target = target;
+  quiz.options = shuffle([target,...distract]);
+  quiz.locked = false;
+}
+function ask(){
+  if(quiz.locked) return;
+  const t = quiz.target;
+  const k = itemKeys(t);
+  /* 日常用语/动作/味道是整句或形容词，直接朗读短语，不问"在哪里" */
+  if(cat==='daily' || cat==='actions' || cat==='tastes'){
+    const other = LANG==='zh' ? 'id' : 'zh';
+    playSequence([
+      {key:k[LANG], text:t[LANG], lang:LANG, gap:200},
+      {key:k[other], text:t[other], lang:other}
+    ]);
+    return;
+  }
+  if(LANG==='zh'){
+    playSequence([{key:k.askzh, text:`${t.zh}在哪里呀？`, lang:'zh', gap:0}]);
+  } else {
+    playSequence([{key:k.askid, text:`Di mana ${t.id}?`, lang:'id', gap:0}]);
+  }
+}
+function answer(idx, btn){
+  if(quiz.locked) return;
+  const it = quiz.options[idx];
+  if(it===quiz.target){
+    quiz.locked = true;
+    btn.classList.add('correct');
+    quiz.stars++;
+    sfx.good();
+    confettiBurst(30);
+    quiz.round++;
+    /* 跟读：主语言单词 → 另一语言单词 → 夸奖；播完再进入下一题 */
+    const other = LANG==='zh' ? 'id' : 'zh';
+    const k = itemKeys(it);
+    const pIdx = Math.floor(Math.random()*4);
+    const praiseText = LANG==='zh' ? UI.praiseZh[pIdx] : UI.praiseId[pIdx];
+    const steps = [
+      {key:k[LANG], text:it[LANG], lang:LANG, gap:200},
+      {key:k[other], text:it[other], lang:other, gap:200},
+      {key:`praise-${pIdx}-${LANG}`, text:praiseText, lang:LANG}
+    ];
+    playSequence(steps).then(()=>{
+      if(screen!=='quiz' || !quiz.locked) return;
+      if(quiz.round>=quiz.total){
+        screen='finish'; render();
+        sfx.fanfare();
+        confettiBurst(60);
+        setTimeout(()=>confettiBurst(40),700);
+      } else {
+        newQuestion(); render();
+      }
+    });
+  } else {
+    btn.classList.add('wrong');
+    sfx.bad();
+    setTimeout(()=>btn.classList.remove('wrong'),450);
+    const tIdx = Math.floor(Math.random()*2);
+    const msg = LANG==='zh' ? UI.tryZh[tIdx] : UI.tryId[tIdx];
+    playSequence([{key:`try-${tIdx}-${LANG}`, text:msg, lang:LANG}]);
+  }
+}
+
+/* ================= 情景对话游戏逻辑 ================= */
+function startChat(set){
+  sfx.pop();
+  chat.set = set ? 1 : 0;
+  chat.scene=0; chat.locked=false;
+  screen='chat';
+  render();
+}
+/* 播放当前角色台词：主语言在前，另一语言在后 */
+function chatLine(){
+  if(chat.locked) return;
+  const scenes = chat.set ? CHAT_SCENES2 : CHAT_SCENES;
+  const sc = scenes[chat.scene];
+  const prefix = chat.set ? 'chat2' : 'chat';
+  const i = chat.scene;
+  const other = LANG==='zh' ? 'id' : 'zh';
+  playSequence([
+    {key:`${prefix}-c${i}-${LANG}`, text:sc.line[LANG], lang:LANG, gap:260},
+    {key:`${prefix}-c${i}-${other}`, text:sc.line[other], lang:other}
+  ]);
+}
+function chatAnswer(idx, btn){
+  if(chat.locked) return;
+  const scenes = chat.set ? CHAT_SCENES2 : CHAT_SCENES;
+  const sc = scenes[chat.scene];
+  const op = sc.options[idx];
+  const phraseMap = chat.set ? Object.assign({},CHAT_PHRASES,CHAT_PHRASES2) : CHAT_PHRASES;
+  const p = phraseMap[op.key];
+  const prefix = chat.set ? 'chat2' : 'chat';
+  const other = LANG==='zh' ? 'id' : 'zh';
+  if(op.ok){
+    chat.locked = true;
+    btn.classList.add('correct');
+    sfx.good();
+    confettiBurst(26);
+    const pIdx = Math.floor(Math.random()*4);
+    const praiseText = LANG==='zh' ? UI.praiseZh[pIdx] : UI.praiseId[pIdx];
+    playSequence([
+      {key:`${prefix}-r-${op.key}-${LANG}`, text:p[LANG], lang:LANG, gap:200},
+      {key:`${prefix}-r-${op.key}-${other}`, text:p[other], lang:other, gap:200},
+      {key:`praise-${pIdx}-${LANG}`, text:praiseText, lang:LANG}
+    ]).then(()=>{
+      if(screen!=='chat' || !chat.locked) return;
+      if(chat.scene >= scenes.length-1){
+        screen='chatfinish'; render();
+        confettiBurst(50);
+        setTimeout(()=>confettiBurst(30),700);
+      } else {
+        chat.scene++; chat.locked=false; render();
+      }
+    });
+  } else {
+    btn.classList.add('wrong');
+    sfx.bad();
+    setTimeout(()=>btn.classList.remove('wrong'),450);
+    const tIdx = Math.floor(Math.random()*2);
+    const msg = LANG==='zh' ? UI.tryZh[tIdx] : UI.tryId[tIdx];
+    playSequence([
+      {key:`${prefix}-r-${op.key}-${LANG}`, text:p[LANG], lang:LANG, gap:160},
+      {key:`try-${tIdx}-${LANG}`, text:msg, lang:LANG}
+    ]);
+  }
+}
+
+/* ================= 背景泡泡 ================= */
+(function makeBubbles(){
+  for(let i=0;i<10;i++){
+    const b=document.createElement('div');
+    b.className='bubble';
+    const s=30+Math.random()*70;
+    b.style.width=s+'px'; b.style.height=s+'px';
+    b.style.left=(Math.random()*100)+'vw';
+    b.style.animationDuration=(9+Math.random()*10)+'s';
+    b.style.animationDelay=(-Math.random()*12)+'s';
+    document.body.appendChild(b);
+  }
+})();
+
+render();
+</script>
+</body>
+</html>
