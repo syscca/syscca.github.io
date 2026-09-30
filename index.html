@@ -590,8 +590,10 @@ function pickVoice(prefix){
 function speakTTS(text, lang){
   return new Promise(resolve=>{
     if(!('speechSynthesis' in window)){ setTimeout(resolve,300); return; }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
+    try{ speechSynthesis.cancel(); }catch(e){}
+    let u;
+    try{ u = new SpeechSynthesisUtterance(String(text==null?'':text)); }
+    catch(e){ setTimeout(resolve,200); return; }
     u.lang = lang==='zh' ? 'zh-CN' : 'id-ID';
     const v = pickVoice(lang==='zh'?'zh':'id');
     if(v) u.voice = v;
@@ -600,7 +602,7 @@ function speakTTS(text, lang){
     const fin = ()=>{ if(!done){ done=true; res(); } };
     u.onend = fin; u.onerror = fin;
     setTimeout(fin, 2800);
-    speechSynthesis.speak(u);
+    try{ speechSynthesis.speak(u); }catch(e){ fin(); }
     function res(){ resolve(); }
   });
 }
@@ -630,13 +632,14 @@ function wait(ms){ return new Promise(r=>setTimeout(r,ms)); }
 /* 播放单条：MP3 成功则用 MP3，失败回退 TTS */
 function oneClip(step, token){
   return new Promise(resolve=>{
-    if(!alive(token)){ resolve('aborted'); return; }
-    const a = getAudio(step.key);
     let settled = false;
     const done = s => { if(!settled){ settled = true; resolve(s); } };
+    try{
+    if(!alive(token)){ done('aborted'); return; }
+    const a = getAudio(step.key);
     const fallback = ()=>{
       if(!alive(token)){ done('aborted'); return; }
-      speakTTS(step.text, step.lang).then(()=>done('tts'));
+      speakTTS(step.text, step.lang).then(()=>done('tts'), ()=>done('tts'));
     };
     const startPlay = ()=>{
       if(a._failed){ fallback(); return; }
@@ -657,6 +660,7 @@ function oneClip(step, token){
     a.addEventListener('canplay',ready);
     a.addEventListener('error',errH);
     setTimeout(()=>{ if(!settled){ rem(); fallback(); } }, 2000);
+    }catch(e){ done('err'); }
   });
 }
 
@@ -666,7 +670,8 @@ async function playSequence(steps){
   Object.values(audioCache).forEach(a=>{ try{ a.pause(); }catch(e){} });
   for(const s of steps){
     if(!alive(token)) return;
-    const r = await oneClip(s, token);
+    let r = 'err';
+    try{ r = await oneClip(s, token); }catch(e){}
     if(!alive(token) || r==='aborted') return;
     if(s.gap) await wait(s.gap);
   }
@@ -989,8 +994,8 @@ function answer(idx, btn){
     quiz.locked = true;
     btn.classList.add('correct');
     quiz.stars++;
-    sfx.good();
-    confettiBurst(30);
+    try{ sfx.good(); }catch(e){}
+    try{ confettiBurst(30); }catch(e){}
     quiz.round++;
     /* 跟读：主语言单词 → 另一语言单词 → 夸奖；播完再进入下一题 */
     const other = LANG==='zh' ? 'id' : 'zh';
@@ -1002,24 +1007,29 @@ function answer(idx, btn){
       {key:k[other], text:it[other], lang:other, gap:200},
       {key:`praise-${pIdx}-${LANG}`, text:praiseText, lang:LANG}
     ];
-    playSequence(steps).then(()=>{
+    /* 兜底：即使语音链路卡死，也保证进入下一题/结算 */
+    let advanced = false;
+    const advance = ()=>{
+      if(advanced) return; advanced = true;
       if(screen!=='quiz' || !quiz.locked) return;
       if(quiz.round>=quiz.total){
         screen='finish'; render();
-        sfx.fanfare();
-        confettiBurst(60);
-        setTimeout(()=>confettiBurst(40),700);
+        try{ sfx.fanfare(); }catch(e){}
+        try{ confettiBurst(60); }catch(e){}
+        setTimeout(()=>{ try{ confettiBurst(40); }catch(e){} },700);
       } else {
         newQuestion(); render();
       }
-    });
+    };
+    playSequence(steps).then(advance).catch(advance);
+    setTimeout(advance, 12000);
   } else {
     btn.classList.add('wrong');
     sfx.bad();
     setTimeout(()=>btn.classList.remove('wrong'),450);
     const tIdx = Math.floor(Math.random()*2);
     const msg = LANG==='zh' ? UI.tryZh[tIdx] : UI.tryId[tIdx];
-    playSequence([{key:`try-${tIdx}-${LANG}`, text:msg, lang:LANG}]);
+    playSequence([{key:`try-${tIdx}-${LANG}`, text:msg, lang:LANG}]).catch(()=>{});
   }
 }
 
